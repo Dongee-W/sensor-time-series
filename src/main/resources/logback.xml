@@ -1,0 +1,28 @@
+<configuration>
+
+    <appender name="STDOUT_FULL" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %C{16} ! %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="STDOUT_TEST" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%L] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="test.logger" level="DEBUG">
+        <appender-ref ref="STDOUT_TEST" />
+    </logger>
+    <logger name="normal.logger" level="DEBUG">
+        <appender-ref ref="STDOUT_FULL" />
+    </logger>
+
+    <root level="INFO">
+
+    </root>
+</configuration>

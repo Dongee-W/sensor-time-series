@@ -7,6 +7,7 @@ import com.sequence.metrics.PairwiseDistance
 import com.sequence.universal_functions._
 import breeze.signal._
 import com.sequence.similarity_search.MatrixProfileI
+import org.slf4j.LoggerFactory
 
 object Test {
   def time[R](block: => R): R = {
@@ -18,7 +19,8 @@ object Test {
   }
 
   def main(args: Array[String]): Unit = {
-
+    val logger = LoggerFactory.getLogger("normal.logger")
+    logger.info("Hello world.")
 
     time{
       for (i <- 1 to 100) {
