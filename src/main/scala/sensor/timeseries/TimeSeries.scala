@@ -1,4 +1,4 @@
-package com.sequence
+package sensor.timeseries
 
 import breeze.linalg.DenseMatrix
 

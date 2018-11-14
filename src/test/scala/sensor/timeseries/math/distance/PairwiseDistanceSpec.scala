@@ -1,4 +1,4 @@
-package com.sequence.metrics
+package sensor.timeseries.math.distance
 
 import breeze.linalg.DenseVector
 import org.scalatest.FlatSpec

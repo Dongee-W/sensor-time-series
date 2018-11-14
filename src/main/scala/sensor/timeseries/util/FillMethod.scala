@@ -1,4 +1,4 @@
-package com.sequence.util
+package sensor.timeseries.util
 
 sealed trait FillMethod
 

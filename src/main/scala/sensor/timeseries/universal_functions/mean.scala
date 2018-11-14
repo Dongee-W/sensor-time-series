@@ -1,4 +1,4 @@
-package com.sequence.universal_functions
+package sensor.timeseries.universal_functions
 
 import breeze.generic.UFunc
 import breeze.linalg.support.CanTraverseValues
@@ -6,7 +6,7 @@ import breeze.linalg.support.CanTraverseValues.ValuesVisitor
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics
 
 
-object std extends UFunc {
+object mean extends UFunc {
   implicit def standardDeviationFromTraverseDoubles[T](implicit traverse: CanTraverseValues[T, Double]): Impl[T, Double] = {
     new Impl[T, Double] {
       def apply(t: T): Double = {
@@ -20,7 +20,7 @@ object std extends UFunc {
           def zeros(count: Int, zeroValue: Double) {}
         })
 
-        Math.sqrt(stats.getPopulationVariance)
+        stats.getMean
       }
     }
   }

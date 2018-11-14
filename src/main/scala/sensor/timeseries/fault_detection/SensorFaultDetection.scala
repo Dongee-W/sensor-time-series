@@ -1,8 +1,8 @@
-package com.sequence.fault_detection
+package sensor.timeseries.fault_detection
 
 import breeze.linalg.{*, BitVector, DenseMatrix, DenseVector, Vector}
-import com.sequence.UnivariateTimeSeries
-import com.sequence.universal_functions.std
+import sensor.timeseries.UnivariateTimeSeries
+import sensor.timeseries.universal_functions.std
 
 /** The algorithm base on "Sensor Network Data Fault Types"
  *

@@ -1,7 +1,7 @@
-package com.sequence
+package sensor.timeseries
 
 import breeze.linalg.{*, BitVector, DenseMatrix, DenseVector, Vector}
-import com.sequence.util._
+import sensor.timeseries.util._
 
 object UnivariateTimeSeries {
 

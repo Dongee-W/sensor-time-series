@@ -1,8 +1,8 @@
-package com.sequence.similarity_search
+package sensor.timeseries.similarity_search
 
 import breeze.linalg.{DenseVector, sum}
-import com.sequence.UnivariateTimeSeries
-import com.sequence.universal_functions.{mean, std}
+import sensor.timeseries.UnivariateTimeSeries
+import sensor.timeseries.universal_functions.{mean, std}
 import org.scalatest.FlatSpec
 import org.slf4j.LoggerFactory
 

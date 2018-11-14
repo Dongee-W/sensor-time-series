@@ -1,7 +1,7 @@
-package com.sequence.fault_detection
+package sensor.timeseries.fault_detection
 
 import breeze.linalg.DenseVector
-import com.sequence.UnivariateTimeSeries
+import sensor.timeseries.UnivariateTimeSeries
 import org.scalatest.FlatSpec
 
 class RapidFaultDetectionSpec extends FlatSpec {

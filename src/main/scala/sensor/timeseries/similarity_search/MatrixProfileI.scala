@@ -1,10 +1,10 @@
-package com.sequence.similarity_search
+package sensor.timeseries.similarity_search
 
 import breeze.linalg.{DenseVector, accumulate, min, reverse}
 import breeze.numerics.{abs, sqrt}
 import breeze.signal.{fourierTr, iFourierTr}
-import com.sequence.UnivariateTimeSeries
-import com.sequence.universal_functions.{mean, std}
+import sensor.timeseries.UnivariateTimeSeries
+import sensor.timeseries.universal_functions.{mean, std}
 
 /** The algorithm proposed in the paper
   * Matrix Profile I: All Pairs Similarity Joins for Time Series:
