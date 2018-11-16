@@ -46,9 +46,9 @@ object Test {
     //println(short)
 
 
+
     /*
-
-
+    implicit val ord = Ordering.by[Double, Double](x => -x)
     val beam = new Beam[Double](5)
     beam += 1.0
     println(beam)
@@ -61,16 +61,18 @@ object Test {
     beam += 10.0
     println(beam)
 
-    println(beam.result().toArray)*/
+    println(beam.result()(4))*/
 
-    //Sorting.quickSort(v)
-    //println(DenseVector(v))
 
+
+
+
+    /*
     time {
       val v1 = DenseVector.rand[Double](1000)
       val v2 = DenseVector.rand[Double](1000)
       MatrixProfileI.stampKF(v1, v2, 256, 3,true)
-    }
+    }*/
 /*
     val v1 = DenseVector.rand[Double](1000)
     val v2 = DenseVector.rand[Double](1000)
