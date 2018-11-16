@@ -4,7 +4,6 @@ import breeze.collection.mutable.Beam
 import breeze.linalg.{*, DenseMatrix, DenseVector, accumulate, argsort, min, reverse}
 import breeze.numerics.{abs, sqrt}
 import breeze.signal.{fourierTr, iFourierTr}
-import sensor.timeseries.UnivariateTimeSeries
 import sensor.timeseries.universal_functions.{mean, std}
 
 import scala.util.Sorting
@@ -86,26 +85,9 @@ object MatrixProfileI {
     * @param sb the second sequence
     * @param subLength interested subsequence length
     * @param ignoreTrivial ignore subsequence within subLength/2 before and after the query
-    * @return tuple of matrix profile and matrix profile index
+    * @return a DenseVector of tuple (matrix profile value, matrix profile index)
     */
   def stamp(sa: DenseVector[Double], sb: DenseVector[Double],
-            subLength: Int, ignoreTrivial: Boolean = false) = {
-    val na = sa.length
-    val nb = sb.length
-    val matrixProfile = DenseVector.fill(na - subLength + 1, Double.PositiveInfinity)
-    val matrixProfileIndex = DenseVector.fill[Int](na - subLength + 1, -1)
-    for (idx <- 0 to nb - subLength) {
-      val distanceProfile = mass(sb(idx until idx + subLength), sa)
-      if (ignoreTrivial) {
-        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
-        distanceProfile(exclusionZone) := Double.PositiveInfinity
-      }
-      matrixProfileIndex(distanceProfile <:< matrixProfile) := idx
-      matrixProfile := min(matrixProfile, distanceProfile)
-    }
-    (matrixProfile, matrixProfileIndex)
-  }
-  def stampI(sa: DenseVector[Double], sb: DenseVector[Double],
             subLength: Int, ignoreTrivial: Boolean = false) = {
     val na = sa.length
     val nb = sb.length
@@ -113,13 +95,15 @@ object MatrixProfileI {
     for (idx <- 0 to nb - subLength) {
       val distanceProfile = mass(sb(idx until idx + subLength), sa)
       if (ignoreTrivial) {
-        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to
+          Math.min(idx + subLength / 2, nb - subLength)
         distanceProfile(exclusionZone) := Double.PositiveInfinity
       }
       implicit val ord = Ordering.by[(Double, Int), Double](_._1)
       matrixProfile.foreachPair {
         (key, value) =>
-          if (distanceProfile(key) < value._1) matrixProfile(key) = (distanceProfile(key), idx)
+          if (distanceProfile(key) < value._1)
+            matrixProfile(key) = (distanceProfile(key), idx)
       }
     }
     matrixProfile
@@ -135,18 +119,55 @@ object MatrixProfileI {
     * @return a DenseVector of tuple (matrix profile value, matrix profile index)
     */
   def stampK(sa: DenseVector[Double], sb: DenseVector[Double],
+                 subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
+    val na = sa.length
+    val nb = sb.length
+
+    implicit val ord = Ordering.by[(Double, Int), Double](-_._1)
+    // Knn matrixProfile as Vector of beam (priority queue with fixed size)
+    val matrixProfile = (1 to na - subLength + 1).map(x => new Beam[(Double, Int)](k))
+
+    for (idx <- 0 to nb - subLength) {
+      val distanceProfile = mass(sb(idx until idx + subLength), sa)
+      if (ignoreTrivial) {
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to
+          Math.min(idx + subLength / 2, nb - subLength)
+        distanceProfile(exclusionZone) := Double.PositiveInfinity
+      }
+
+      distanceProfile.foreachPair {
+        (key, value) =>
+          matrixProfile(key) += ((value, idx))
+      }
+    }
+    DenseVector(matrixProfile.map(x => x.result()(k-1)).toArray)
+  }
+
+
+  /** stampK with quicksort
+    * Usually slow than stampK using beam data struture
+    * (extensive performace test still required to varify this)
+    *
+    * @param sa
+    * @param sb
+    * @param subLength
+    * @param k
+    * @param ignoreTrivial
+    * @return a DenseVector of tuple (matrix profile value, matrix profile index)
+    */
+  def stampKQuicksort(sa: DenseVector[Double], sb: DenseVector[Double],
              subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
     val na = sa.length
     val nb = sb.length
     val matrixProfile = DenseMatrix.fill(na - subLength + 1, k + 1)((Double.PositiveInfinity, -1))
-    //val matrixProfileIndex = DenseVector.fill[Int](na - subLength + 1, -1)
     for (idx <- 0 to nb - subLength) {
       val distanceProfile = mass(sb(idx until idx + subLength), sa)
       if (ignoreTrivial) {
-        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to
+          Math.min(idx + subLength / 2, nb - subLength)
         distanceProfile(exclusionZone) := Double.PositiveInfinity
       }
-      //matrixProfileIndex(distanceProfile <:< matrixProfile) := idx
+
       matrixProfile(::, k) := distanceProfile.map(x => (x, idx))
       matrixProfile(*, ::).foreach {
         x =>
@@ -157,42 +178,5 @@ object MatrixProfileI {
     }
     matrixProfile(::, k - 1)
   }
-
-  /** stampK with beam data structure
-    * Only faster than original stampK when k is relatively large e.g. 50
-    *
-    * @param sa
-    * @param sb
-    * @param subLength
-    * @param k
-    * @param ignoreTrivial
-    * @return
-    */
-  def stampKBeam(sa: DenseVector[Double], sb: DenseVector[Double],
-              subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
-    val na = sa.length
-    val nb = sb.length
-
-    implicit val ord = Ordering.by[Double, Double](x => -x)
-    // Knn matrixProfile as beam (priority queue)
-    val matrixProfile = (1 to na - subLength + 1).map(x => new Beam[Double](k))
-    //= DenseMatrix.fill(na - subLength + 1, k + 1)(Double.PositiveInfinity)
-    //val matrixProfileIndex = DenseVector.fill[Int](na - subLength + 1, -1)
-    for (idx <- 0 to nb - subLength) {
-      val distanceProfile = mass(sb(idx until idx + subLength), sa)
-      if (ignoreTrivial) {
-        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
-        distanceProfile(exclusionZone) := Double.PositiveInfinity
-      }
-      //matrixProfileIndex(distanceProfile <:< matrixProfile) := idx
-      distanceProfile.foreachPair {
-        (i, x) =>
-          matrixProfile(i) += x
-      }
-    }
-    DenseVector(matrixProfile.map(x => x.result()(k-1)).toArray)
-  }
-
-
 
 }
