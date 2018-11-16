@@ -1,10 +1,12 @@
 package sensor.timeseries.similarity_search
 
-import breeze.linalg.{DenseVector, accumulate, min, reverse}
+import breeze.linalg.{*, DenseMatrix, DenseVector, accumulate, argsort, min, reverse}
 import breeze.numerics.{abs, sqrt}
 import breeze.signal.{fourierTr, iFourierTr}
 import sensor.timeseries.UnivariateTimeSeries
 import sensor.timeseries.universal_functions.{mean, std}
+
+import scala.util.Sorting
 
 /** The algorithm proposed in the paper
   * Matrix Profile I: All Pairs Similarity Joins for Time Series:
@@ -101,6 +103,54 @@ object MatrixProfileI {
       matrixProfile := min(matrixProfile, distanceProfile)
     }
     (matrixProfile, matrixProfileIndex)
+  }
+
+  def stampK(sa: DenseVector[Double], sb: DenseVector[Double],
+            subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
+    val na = sa.length
+    val nb = sb.length
+    val matrixProfile = DenseMatrix.fill(na - subLength + 1, k + 1)(Double.PositiveInfinity)
+    //val matrixProfileIndex = DenseVector.fill[Int](na - subLength + 1, -1)
+    for (idx <- 0 to nb - subLength) {
+      val distanceProfile = mass(sb(idx until idx + subLength), sa)
+      if (ignoreTrivial) {
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
+        distanceProfile(exclusionZone) := matrixProfile(exclusionZone, k - 1)
+      }
+      //matrixProfileIndex(distanceProfile <:< matrixProfile) := idx
+      matrixProfile(::, k) := distanceProfile
+      matrixProfile(*, ::).foreach {
+          x =>
+            val order = argsort(x)
+            val sorted = x(order).copy
+            x := sorted
+      }
+    }
+    matrixProfile(::, k - 1)
+  }
+
+  def stampKF(sa: DenseVector[Double], sb: DenseVector[Double],
+             subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
+    val na = sa.length
+    val nb = sb.length
+    val matrixProfile = DenseMatrix.fill(na - subLength + 1, k + 1)(Double.PositiveInfinity)
+    //val matrixProfileIndex = DenseVector.fill[Int](na - subLength + 1, -1)
+    for (idx <- 0 to nb - subLength) {
+      val distanceProfile = mass(sb(idx until idx + subLength), sa)
+      if (ignoreTrivial) {
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to Math.min(idx + subLength / 2, nb - subLength)
+        distanceProfile(exclusionZone) := matrixProfile(exclusionZone, k - 1)
+      }
+      //matrixProfileIndex(distanceProfile <:< matrixProfile) := idx
+      matrixProfile(::, k) := distanceProfile
+      matrixProfile(*, ::).foreach {
+        x =>
+          val sorted = x.toArray
+          Sorting.quickSort(sorted)
+          x := DenseVector(sorted)
+      }
+    }
+    matrixProfile(::, k - 1)
   }
 
 

@@ -44,4 +44,11 @@ class MatrixProfileISpec extends FlatSpec {
     logger.debug(dp.toString)
   }
 
+  "The stampK function" should "calculate matrix profile for two sequence" in {
+    val dp = MatrixProfileI.stampK(DenseVector(1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 0.5, 0.6, 1.0),
+      DenseVector(0.5, 0.6, 1.0, 2.0, 3.0, 2.0, 1.0), 3, 1, true)
+
+    logger.debug(dp.toString)
+  }
+
 }
