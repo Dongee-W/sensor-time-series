@@ -1,8 +1,9 @@
 package sensor.timeseries.motif
 
-import breeze.linalg.{BitVector, DenseVector}
+import breeze.linalg.{BitVector, DenseVector, argmax}
 import org.scalatest.FlatSpec
 import org.slf4j.LoggerFactory
+import sensor.timeseries.dataset.NaiveTimeSeries
 import sensor.timeseries.similarity_search.MatrixProfileI
 
 class MotifDiscoverySpec extends FlatSpec {
@@ -16,7 +17,8 @@ class MotifDiscoverySpec extends FlatSpec {
   }
 
   "The findMotif function" should "find the best motif in a sequence" in {
-    println(MotifDiscovery.findMotif(DenseVector(1.0,2.0, 3, 3, 2.2, 1.1, 3,2, 1.0,2.0, 3), 3, 1.5))
+    val series = NaiveTimeSeries.simpleRepeatingPatterns
+    println(argmax(MotifDiscovery.findMotif(series, 10, 0.1)))
 
   }
 }

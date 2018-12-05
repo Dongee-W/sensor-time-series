@@ -52,8 +52,15 @@ class MatrixProfileISpec extends FlatSpec {
     logger.debug(dp.toString)
   }
 
-  "The stampKBeam function" should "calculate matrix profile for two sequence" in {
-    val dp = MatrixProfileI.stampKBeam(DenseVector(1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 0.5, 0.6, 1.0),
+  "The stampKMAX function" should "calculate matrix profile for two sequence" in {
+    val dp = MatrixProfileI.stampKMAX(DenseVector(1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 0.5, 0.6, 1.0),
+      DenseVector(0.5, 0.6, 1.0, 2.0, 3.0, 2.0, 1.0), 3, 2, true)
+
+    logger.debug(dp.toString)
+  }
+
+  "The stampKQuicksort function" should "calculate matrix profile for two sequence" in {
+    val dp = MatrixProfileI.stampKQuicksort(DenseVector(1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 0.5, 0.6, 1.0),
       DenseVector(0.5, 0.6, 1.0, 2.0, 3.0, 2.0, 1.0), 3, 2, true)
 
     logger.debug(dp.toString)

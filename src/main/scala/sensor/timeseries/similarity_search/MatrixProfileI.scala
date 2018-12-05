@@ -116,7 +116,7 @@ object MatrixProfileI {
     * @param subLength
     * @param k
     * @param ignoreTrivial
-    * @return a DenseVector of tuple (matrix profile value, matrix profile index)
+    * @return a DenseMatrix with each column representing k neighbor in 0 to k
     */
   def stampK(sa: DenseVector[Double], sb: DenseVector[Double],
                  subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
@@ -140,7 +140,39 @@ object MatrixProfileI {
           matrixProfile(key) += ((value, idx))
       }
     }
-    DenseVector(matrixProfile.map(x => x.result()(k-1)).toArray)
+
+    DenseVector(matrixProfile.map(x => x.result().toArray))
+  }
+
+  def stampKMAX(sa: DenseVector[Double], sb: DenseVector[Double],
+             subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
+    val na = sa.length
+    val nb = sb.length
+
+    implicit val ord = Ordering.by[(Double, Int), Double](-_._1)
+    // Knn matrixProfile as Vector of beam (priority queue with fixed size)
+    val matrixProfile = (1 to na - subLength + 1).map(x => new Beam[(Double, Int)](k))
+
+    for (idx <- 0 to nb - subLength) {
+      val distanceProfile = mass(sb(idx until idx + subLength), sa)
+      if (ignoreTrivial) {
+        val exclusionZone = Math.max(idx - subLength / 2, 0) to
+          Math.min(idx + subLength / 2, nb - subLength)
+        distanceProfile(exclusionZone) := Double.PositiveInfinity
+      }
+
+      distanceProfile.foreachPair {
+        (key, value) =>
+          matrixProfile(key) += ((value, idx))
+      }
+    }
+
+    val kMatrixProfile = DenseMatrix.fill(na - subLength + 1, k)((1.0, 1))
+    for (i <- 0 to na - subLength) {
+      kMatrixProfile(i, ::) := DenseVector(matrixProfile(i).result().toArray).t
+    }
+
+    kMatrixProfile
   }
 
 
@@ -153,7 +185,7 @@ object MatrixProfileI {
     * @param subLength
     * @param k
     * @param ignoreTrivial
-    * @return a DenseVector of tuple (matrix profile value, matrix profile index)
+    * @return a DenseMatrix with each column representing k neighbor in 0 to k
     */
   def stampKQuicksort(sa: DenseVector[Double], sb: DenseVector[Double],
              subLength: Int, k: Int, ignoreTrivial: Boolean = false) = {
@@ -176,7 +208,7 @@ object MatrixProfileI {
           x := DenseVector(sorted)
       }
     }
-    matrixProfile(::, k - 1)
+    matrixProfile(::, 0 until k)
   }
 
 }

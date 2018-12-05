@@ -16,6 +16,9 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 // https://mvnrepository.com/artifact/com.github.haifengl/smile-core
 libraryDependencies += "com.github.haifengl" % "smile-core" % "1.5.2"
 
+// https://mvnrepository.com/artifact/net.seninp/jmotif-sax
+libraryDependencies += "net.seninp" % "jmotif-sax" % "1.1.4"
+
 // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
 
