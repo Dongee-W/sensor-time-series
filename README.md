@@ -1,8 +1,8 @@
 # Algorithms and utility functions for sensor data
 ![version](https://img.shields.io/badge/version-0.1-yellow.svg)
-![spark](https://img.shields.io/badge/spark-2.3-orange.svg)
+![scala](https://img.shields.io/badge/scala-2.3-red.svg)
 ![breeze](https://img.shields.io/badge/breeze-0.13.2-blue.svg)
-![smile](https://img.shields.io/badge/smile-1.5.2-yellow.svg)
+![smile](https://img.shields.io/badge/smile-1.5.2-orange.svg)
 
 
 
