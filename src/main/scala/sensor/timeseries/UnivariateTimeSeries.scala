@@ -2,6 +2,7 @@ package sensor.timeseries
 
 import breeze.linalg.{*, BitVector, DenseMatrix, DenseVector, Vector}
 import sensor.timeseries.util._
+import sensor.timeseries.universal_functions.{std, mean}
 
 object UnivariateTimeSeries {
 
@@ -321,6 +322,43 @@ object UnivariateTimeSeries {
       slidingVec(r) = f(x(r until r + window).toDenseVector)
     }
     slidingVec
+  }
+
+  /** Transform sequence to unit standard deviation and zero mean
+    * (NaN and Infinity)
+    * @param s sequence
+    * @param withStd whether to scale with standard deviation
+    * @param withMean whether to subtract mean from data
+    * @param stdThreshold if standard deviation is small the stdThreshold, the sequence will not be scaled
+    */
+  def standardScale(s: Array[Double], withStd: Boolean = true, withMean: Boolean = true, stdThreshold: Double = 0.5) = {
+    val v = DenseVector(s)
+    val m = mean(v)
+    val scaler = std(v)
+
+    val toScale =  withStd && scaler > stdThreshold
+    val result =
+      if (withMean && toScale) (v - m) / scaler
+      else if (withMean && !toScale) v - m
+      else if (!withMean && toScale)  v / scaler
+      else if (!withMean && !withStd) v
+      else v
+    result.toArray
+  }
+
+  def standardScale(s: DenseVector[Double], withStd: Boolean = true, withMean: Boolean = true, stdThreshold: Double = 0.5) = {
+    val m = mean(s)
+    val scaler = std(s)
+
+    val toScale =  withStd && scaler > stdThreshold
+    val result =
+      if (withMean && toScale) (s- m) / scaler
+      else if (withMean && !toScale) s - m
+      else if (!withMean && toScale)  s / scaler
+      else if (!withMean && !withStd) s
+      else s
+
+    result
   }
 
 }

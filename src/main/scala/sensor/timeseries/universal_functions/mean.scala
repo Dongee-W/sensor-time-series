@@ -6,6 +6,7 @@ import breeze.linalg.support.CanTraverseValues.ValuesVisitor
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics
 
 
+/** Calculate mean of numbers ignoring NaN and Infinity */
 object mean extends UFunc {
   implicit def standardDeviationFromTraverseDoubles[T](implicit traverse: CanTraverseValues[T, Double]): Impl[T, Double] = {
     new Impl[T, Double] {
